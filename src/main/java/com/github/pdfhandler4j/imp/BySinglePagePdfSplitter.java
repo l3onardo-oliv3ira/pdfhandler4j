@@ -2,8 +2,8 @@ package com.github.pdfhandler4j.imp;
 
 import com.github.utils4j.imp.Strings;
 
-public class SplitBySinglePagePdfHandler extends SplitByCountPdfHandler {
-  public SplitBySinglePagePdfHandler() {
+public class BySinglePagePdfSplitter extends ByCountPdfSplitter {
+  public BySinglePagePdfSplitter() {
     super(1);
   }
   

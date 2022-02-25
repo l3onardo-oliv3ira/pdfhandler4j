@@ -11,19 +11,20 @@ public class TestAll {
   
   public static void main(String[] args) throws IOException {
     IPdfHandler[] handlers = new IPdfHandler[] {
-      new SplitBySizePdfHandler((int)(500 * 1024 * 1024)),
-      new SplitByCountPdfHandler(300),
-      new SplitByPagesPdfHandler(
+      new BySizePdfSplitter((int)(50 * 1024 * 1024)),
+      new ByCountPdfSplitter(300),
+      new ByPagesPdfSplitter(
         new PageRange(1, 1),
         new PageRange(3, 6),
         new PageRange(10, 20),
         new PageRange(25, 25),
         new PageRange(100, 200),
-        new PageRange(400, 600)
+        new PageRange(400, 600),
+        new PageRange(3000, 4500)
       ),
-      new SplitByOddPagesPdfHandler(),
-      new SplitByEvenPagesPdfHandler(),
-      new SplitBySinglePagePdfHandler()
+      new ByOddPagesPdfSplitter(),
+      new ByEvenPagesPdfSplitter(),
+      new BySinglePagePdfSplitter()
     };
     
     final String[] outputPath = new String[] {
@@ -35,17 +36,29 @@ public class TestAll {
       "bysingle"
     };
     
-    Path baseInput = Paths.get("D:/temp/");
+    Path baseInput = Paths.get("D:/pdfinput/");
     int i = 0;
     for(IPdfHandler handler: handlers) {
       IInputDescriptor desc = new InputDescriptor.Builder()
-        .add(baseInput.resolve("1200MB.pdf").toFile())
+        .add(baseInput.resolve("200MB.pdf").toFile())
         .output(baseInput.resolve(outputPath[i++]))
         .build();
       handler.apply(desc).subscribe((s) -> {
         System.out.println(s.toString());
       });
     }
+    
+    IInputDescriptor desc = new InputDescriptor.Builder()
+        .add(baseInput.resolve("1.pdf").toFile())
+        .add(baseInput.resolve("2.pdf").toFile())        
+        .add(baseInput.resolve("3.pdf").toFile())
+        .add(baseInput.resolve("4.pdf").toFile())
+        .add(baseInput.resolve("5.pdf").toFile())
+        .output(baseInput.resolve("merge"))
+        .build();
+    new JoinPdfHandler("final-merge-file").apply(desc).subscribe((s) -> {
+      System.out.println(s.toString());
+    });
   }
 
 }

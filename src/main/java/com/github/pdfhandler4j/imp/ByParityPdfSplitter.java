@@ -2,7 +2,7 @@ package com.github.pdfhandler4j.imp;
 
 import com.github.pdfhandler4j.IPdfPageRange;
 
-public abstract class SplitByParityPdfHandler extends AbstractPdfHandler{
+public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   
   protected static boolean isEven(int value) {
     return value % 2 == 0;
@@ -12,7 +12,7 @@ public abstract class SplitByParityPdfHandler extends AbstractPdfHandler{
     return !isEven(value);
   }
 
-  protected SplitByParityPdfHandler(int startPage) {
+  protected ByParityPdfSplitter(int startPage) {
     super(new PageRange(startPage, Integer.MAX_VALUE));
   }
   

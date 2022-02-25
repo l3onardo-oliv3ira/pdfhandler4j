@@ -4,11 +4,11 @@ import com.github.pdfhandler4j.IPdfPageRange;
 import com.github.utils4j.imp.Args;
 import com.itextpdf.text.pdf.PdfCopy;
 
-public class SplitBySizePdfHandler extends SplitByVolumePdfHandler {
+public class BySizePdfSplitter extends ByVolumePdfSplitter {
 
   private final long maxSize;
   
-  public SplitBySizePdfHandler(long maxSize) {
+  public BySizePdfSplitter(long maxSize) {
     this.maxSize = Args.requirePositive(maxSize, "maxSize is < 1");
   }
   

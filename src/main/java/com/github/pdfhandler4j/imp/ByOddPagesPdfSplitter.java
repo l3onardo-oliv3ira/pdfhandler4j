@@ -1,7 +1,7 @@
 package com.github.pdfhandler4j.imp;
 
-public class SplitByOddPagesPdfHandler extends SplitByParityPdfHandler {
-  public SplitByOddPagesPdfHandler() {
+public class ByOddPagesPdfSplitter extends ByParityPdfSplitter {
+  public ByOddPagesPdfSplitter() {
     super(1);
   }
   

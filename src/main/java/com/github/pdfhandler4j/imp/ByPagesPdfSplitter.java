@@ -2,9 +2,9 @@ package com.github.pdfhandler4j.imp;
 
 import com.github.pdfhandler4j.IPdfPageRange;
 
-public class SplitByPagesPdfHandler extends SplitByVolumePdfHandler{
+public class ByPagesPdfSplitter extends ByVolumePdfSplitter{
 
-  public SplitByPagesPdfHandler(IPdfPageRange... ranges) {
+  public ByPagesPdfSplitter(IPdfPageRange... ranges) {
     super(ranges);
   }
 
