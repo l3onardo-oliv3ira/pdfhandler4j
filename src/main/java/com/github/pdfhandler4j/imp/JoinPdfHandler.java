@@ -72,12 +72,18 @@ public class JoinPdfHandler extends AbstractPdfHandler {
     }
   }
   
+  @Override
   protected void handleError(Throwable e) {    
     this.close();
+    this.cleanOutput();
+    super.handleError(e);
+  }
+
+  private void cleanOutput() {
     if (output != null) {
       output.delete();
+      output = null;
     }
-    super.handleError(e);
   }
   
   @Override
