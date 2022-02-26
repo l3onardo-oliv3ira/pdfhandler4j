@@ -37,11 +37,11 @@ public class TestAll {
       "bysingle"
     };
     
-    Path baseInput = Paths.get("D:/pdfinput/");
+    Path baseInput = Paths.get("D:/temp/");
     int i = 0;
     for(IFileHandler<?> handler: handlers) {
       IInputDescriptor desc = new InputDescriptor.Builder()
-        .add(baseInput.resolve("200MB.pdf").toFile())
+        .add(baseInput.resolve("600MB.pdf").toFile())
         .output(baseInput.resolve(outputPath[i++]))
         .build();
       handler.apply(desc).subscribe((s) -> {

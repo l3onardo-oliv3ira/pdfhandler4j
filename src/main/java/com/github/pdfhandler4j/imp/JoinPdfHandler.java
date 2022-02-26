@@ -6,21 +6,24 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import com.github.filehandler4j.imp.AbstractFileHandler;
-import com.github.pdfhandler4j.IPdfEvent;
+import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.utils4j.imp.Args;
+import com.github.utils4j.imp.StopWatch;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-public class JoinPdfHandler extends AbstractFileHandler<IPdfEvent> {
+public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
 
   private File output;
   private final String mergeFileName;
   private Document document;
   private PdfCopy copy;
-
+  private int totalPages;
+  private StopWatch stopWatch = new StopWatch();
+  
   public JoinPdfHandler(String mergeFileName) {
     this.mergeFileName = Args.requireText(mergeFileName, "mergeFileName is empty");
   }
@@ -48,28 +51,47 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfEvent> {
   public void reset() {
     this.close();
     this.output = null;
+    this.totalPages = 0;
+    this.stopWatch.reset();
     super.reset();
   }
   
   @Override
-  protected void beforeHandle(Emitter<IPdfEvent> emitter) throws Exception {
+  protected void beforeHandle(Emitter<IPdfInfoEvent> emitter) throws Exception {
     document = new Document();
     copy = new PdfCopy(document, new FileOutputStream(output = resolve(mergeFileName)));
-    document.open();    
+    document.open();   
+    totalPages = 0;
+    stopWatch.reset();
+    stopWatch.start();
   }
 
   @Override
-  protected void handle(File file, Emitter<IPdfEvent> emitter) throws Exception {
-    emitter.onNext(new PdfEvent("Processando arquivo " + file.getName(), 0));
+  protected void handle(File file, Emitter<IPdfInfoEvent> emitter) throws Exception {
+    StopWatch handleWatch = new StopWatch();
+    emitter.onNext(new PdfInfoEvent("Lendo arquivo " + file.getName()));
+    
+    handleWatch.start();
     PdfReader reader = new PdfReader(file.toURI().toURL());
+    long time = handleWatch.stop();
+    
+    emitter.onNext(new PdfInfoEvent("Lidos " + (file.length() / 1024f) + "KB em " + (time / 1000f) + " segundos"));
+    totalPages += reader.getNumberOfPages();
+
     try {
+      handleWatch.start();
       copy.addDocument(reader);
+      time = handleWatch.stop();
+      emitter.onNext(new PdfInfoEvent("Mescladas " + totalPages + " páginas em " + (time / 1000f) + " segundos"));
     }finally {
+      handleWatch.start();
       try {
         copy.freeReader(reader);
       } finally {      
         reader.close();
+        handleWatch.stop();
       }
+      emitter.onNext(new PdfInfoEvent("handle time: " + handleWatch.getTime()));
     }
   }
   
@@ -88,8 +110,9 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfEvent> {
   }
   
   @Override
-  protected void afterHandle(Emitter<IPdfEvent> emitter) {
+  protected void afterHandle(Emitter<IPdfInfoEvent> emitter) {
     close();
-    emitter.onNext(new PdfEvent("Gerado arquivo " + output.getName(), 0, output));
+    long time = stopWatch.stop();
+    emitter.onNext(new PdfOutputEvent("Gerado arquivo " + output.getName() + " em " + (time / 1000f) + " segundos ", output, totalPages));
   }  
 }
