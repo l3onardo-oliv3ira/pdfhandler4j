@@ -22,7 +22,7 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
 
   @Override
-  protected boolean mustSplit(long currentCombined, PageRange range, long max, int totalPages) {
+  protected boolean mustSplit(long currentCombined, PageRange range, long max, long totalPages) {
     return false;
   }
 }

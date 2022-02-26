@@ -4,14 +4,14 @@ import com.github.utils4j.imp.Args;
 
 public class ByCountPdfSplitter extends ByVolumePdfSplitter {
 
-  private final int pageCount;
+  private final long pageCount;
   
-  public ByCountPdfSplitter(int pageCount) {
+  public ByCountPdfSplitter(long pageCount) {
     this.pageCount = Args.requirePositive(pageCount, "pageCount is < 1");
   }
   
   @Override
-  protected boolean mustSplit(long currentCombined, PageRange range, long max, int totalPages) {
+  protected boolean mustSplit(long currentCombined, PageRange range, long max, long totalPages) {
     return currentCombined >= pageCount;
   }
 }

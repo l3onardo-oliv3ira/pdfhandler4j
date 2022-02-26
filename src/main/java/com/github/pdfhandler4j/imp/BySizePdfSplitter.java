@@ -18,7 +18,7 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
   }
   
   @Override
-  protected boolean mustSplit(long currentCombinedValue, PageRange range, long max, int totalPages) {
+  protected boolean mustSplit(long currentCombinedValue, PageRange range, long max, long totalPages) {
     return currentCombinedValue + max + 2 * (maxSize / totalPages) > maxSize;
   }
 }

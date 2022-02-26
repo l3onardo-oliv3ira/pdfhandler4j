@@ -153,5 +153,5 @@ public abstract class AbstractPdfSplitter extends AbstractFileHandler<IPdfEvent>
     };
   }  
 
-  protected abstract boolean mustSplit(long currentCombined, PageRange range, long max, int totalPages);
+  protected abstract boolean mustSplit(long currentCombined, PageRange range, long max, long totalPages);
 }
