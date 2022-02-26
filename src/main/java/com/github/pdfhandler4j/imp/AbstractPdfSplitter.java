@@ -19,7 +19,7 @@ import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-public abstract class AbstractPdfSplitter extends AbstractFileHandler<IPdfInfoEvent> {
+abstract class AbstractPdfSplitter extends AbstractFileHandler<IPdfInfoEvent> {
 
   private int iterator = 0;
   protected long pageNumber = 0;
