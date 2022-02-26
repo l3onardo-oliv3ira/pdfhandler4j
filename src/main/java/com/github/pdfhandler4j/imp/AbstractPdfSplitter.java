@@ -9,9 +9,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 
 import com.github.filehandler4j.imp.AbstractFileHandler;
-import com.github.filehandler4j.imp.event.FileInfoEvent;
 import com.github.pdfhandler4j.IPdfInfoEvent;
-import com.github.pdfhandler4j.IPdfPageEvent;
 import com.github.utils4j.imp.Args;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
