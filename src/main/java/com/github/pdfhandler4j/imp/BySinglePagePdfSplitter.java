@@ -8,7 +8,7 @@ public class BySinglePagePdfSplitter extends ByCountPdfSplitter {
   }
   
   @Override
-  protected String computeFileName(int beginPage) {
+  protected String computeFileName(long beginPage) {
     return "pg-" + Strings.leftFill(beginPage, 5, '0');
   }
 }

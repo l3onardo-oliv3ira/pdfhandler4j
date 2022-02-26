@@ -1,6 +1,5 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.pdfhandler4j.IPdfPageRange;
 import com.github.utils4j.imp.Args;
 
 public class ByCountPdfSplitter extends ByVolumePdfSplitter {
@@ -12,7 +11,7 @@ public class ByCountPdfSplitter extends ByVolumePdfSplitter {
   }
   
   @Override
-  protected boolean mustSplit(long currentCombined, IPdfPageRange range, long max, int totalPages) {
+  protected boolean mustSplit(long currentCombined, PageRange range, long max, int totalPages) {
     return currentCombined >= pageCount;
   }
 }

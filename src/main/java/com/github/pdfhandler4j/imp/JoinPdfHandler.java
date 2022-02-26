@@ -5,7 +5,8 @@ import static com.github.utils4j.imp.Throwables.tryRun;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import com.github.pdfhandler4j.IPdfStatus;
+import com.github.filehandler4j.imp.AbstractFileHandler;
+import com.github.pdfhandler4j.IPdfEvent;
 import com.github.utils4j.imp.Args;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
@@ -13,7 +14,7 @@ import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-public class JoinPdfHandler extends AbstractPdfHandler {
+public class JoinPdfHandler extends AbstractFileHandler<IPdfEvent> {
 
   private File output;
   private final String mergeFileName;
@@ -51,15 +52,15 @@ public class JoinPdfHandler extends AbstractPdfHandler {
   }
   
   @Override
-  protected void beforeHandle(Emitter<IPdfStatus> emitter) throws Exception {
+  protected void beforeHandle(Emitter<IPdfEvent> emitter) throws Exception {
     document = new Document();
     copy = new PdfCopy(document, new FileOutputStream(output = resolve(mergeFileName)));
     document.open();    
   }
 
   @Override
-  protected void handle(File file, Emitter<IPdfStatus> emitter) throws Exception {
-    emitter.onNext(new PdfStatus("Processando arquivo " + file.getName(), 0));
+  protected void handle(File file, Emitter<IPdfEvent> emitter) throws Exception {
+    emitter.onNext(new PdfEvent("Processando arquivo " + file.getName(), 0));
     PdfReader reader = new PdfReader(file.toURI().toURL());
     try {
       copy.addDocument(reader);
@@ -87,8 +88,8 @@ public class JoinPdfHandler extends AbstractPdfHandler {
   }
   
   @Override
-  protected void afterHandle(Emitter<IPdfStatus> emitter) {
+  protected void afterHandle(Emitter<IPdfEvent> emitter) {
     close();
-    emitter.onNext(new PdfStatus("Gerado arquivo " + output.getName(), 0, output));
+    emitter.onNext(new PdfEvent("Gerado arquivo " + output.getName(), 0, output));
   }  
 }

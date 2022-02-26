@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.github.pdfhandler4j.IInputDescriptor;
-import com.github.pdfhandler4j.IPdfHandler;
+import com.github.filehandler4j.IFileHandler;
+import com.github.filehandler4j.IInputDescriptor;
+import com.github.filehandler4j.imp.InputDescriptor;
 
 public class TestAll {
   
   public static void main(String[] args) throws IOException {
-    IPdfHandler[] handlers = new IPdfHandler[] {
+    IFileHandler<?>[] handlers = new IFileHandler[] {
       new BySizePdfSplitter((int)(50 * 1024 * 1024)),
       new ByCountPdfSplitter(300),
       new ByPagesPdfSplitter(
@@ -38,7 +39,7 @@ public class TestAll {
     
     Path baseInput = Paths.get("D:/pdfinput/");
     int i = 0;
-    for(IPdfHandler handler: handlers) {
+    for(IFileHandler<?> handler: handlers) {
       IInputDescriptor desc = new InputDescriptor.Builder()
         .add(baseInput.resolve("200MB.pdf").toFile())
         .output(baseInput.resolve(outputPath[i++]))

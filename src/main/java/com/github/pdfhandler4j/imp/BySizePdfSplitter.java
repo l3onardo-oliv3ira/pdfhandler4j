@@ -1,6 +1,5 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.pdfhandler4j.IPdfPageRange;
 import com.github.utils4j.imp.Args;
 import com.itextpdf.text.pdf.PdfCopy;
 
@@ -19,7 +18,7 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
   }
   
   @Override
-  protected boolean mustSplit(long currentCombinedValue, IPdfPageRange range, long max, int totalPages) {
+  protected boolean mustSplit(long currentCombinedValue, PageRange range, long max, int totalPages) {
     return currentCombinedValue + max + 2 * (maxSize / totalPages) > maxSize;
   }
 }
