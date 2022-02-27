@@ -8,28 +8,28 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 
-import com.github.filehandler4j.imp.AbstractFileHandler;
+import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.pdfhandler4j.IPdfInfoEvent;
-import com.github.utils4j.imp.Args;
+import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
+import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
+import com.github.pdfhandler4j.imp.event.PdfPageEvent;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-abstract class AbstractPdfSplitter extends AbstractFileHandler<IPdfInfoEvent> {
+abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent> {
 
-  private int iterator = 0;
   protected long pageNumber = 0;
   private File currentOutput = null;
-  private final PageRange[] pageRanges;  
 
   public AbstractPdfSplitter() {
     this(new PageRange());
   }
   
   public AbstractPdfSplitter(PageRange... ranges) {
-    this.pageRanges = Args.requireNonEmpty(ranges, "pages is empty");
+    super(ranges);
     this.reset();
   }
   
@@ -74,19 +74,9 @@ abstract class AbstractPdfSplitter extends AbstractFileHandler<IPdfInfoEvent> {
     super.handleError(e);
   }
 
-  protected final PageRange nextRange() {
-    if (iterator == pageRanges.length)
-      return null;
-    PageRange next = pageRanges[iterator++];
-    while(next == null && iterator < pageRanges.length)
-      next = pageRanges[iterator++];
-    return next;
-  }
-  
   @Override
   public void reset() {
     pageNumber = 0;
-    iterator = 0;
     currentOutput = null;
     super.reset();
   }  

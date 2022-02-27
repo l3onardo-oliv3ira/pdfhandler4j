@@ -1,4 +1,4 @@
-package com.github.pdfhandler4j.imp;
+package com.github.pdfhandler4j.imp.event;
 
 import com.github.filehandler4j.imp.event.FileInfoEvent;
 import com.github.pdfhandler4j.IPdfInfoEvent;

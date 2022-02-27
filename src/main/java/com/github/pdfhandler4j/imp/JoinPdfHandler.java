@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 
 import com.github.filehandler4j.imp.AbstractFileHandler;
 import com.github.pdfhandler4j.IPdfInfoEvent;
+import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
+import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.StopWatch;
 import com.itextpdf.text.Document;
