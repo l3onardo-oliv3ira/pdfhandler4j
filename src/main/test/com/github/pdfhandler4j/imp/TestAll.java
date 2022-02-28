@@ -12,7 +12,7 @@ public class TestAll {
   
   public static void main(String[] args) throws IOException {
     IFileHandler<?>[] handlers = new IFileHandler[] {
-      new BySizePdfSplitter((int)(50 * 1024 * 1024)),
+      new BySizePdfSplitter(50 * 1024 * 1024),
       new ByCountPdfSplitter(300),
       new ByPagesPdfSplitter(
         new PageRange(1, 1),
