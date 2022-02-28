@@ -1,6 +1,6 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.utils4j.imp.Strings;
+import static com.github.utils4j.imp.Strings.padStart;
 
 public class BySinglePagePdfSplitter extends ByCountPdfSplitter {
   public BySinglePagePdfSplitter() {
@@ -9,6 +9,6 @@ public class BySinglePagePdfSplitter extends ByCountPdfSplitter {
   
   @Override
   protected String computeFileName(long beginPage) {
-    return "pg-" + Strings.leftFill(beginPage, 5, '0');
+    return "pg-" + padStart(beginPage, 5);
   }
 }

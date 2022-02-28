@@ -1,6 +1,6 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.utils4j.imp.Strings;
+import static com.github.utils4j.imp.Strings.padStart;
 
 public abstract class ByVolumePdfSplitter extends AbstractPdfSplitter {
 
@@ -20,6 +20,6 @@ public abstract class ByVolumePdfSplitter extends AbstractPdfSplitter {
   
   @Override
   protected String computeFileName(long beginPage) {
-    return "VOLUME-" + Strings.leftFill(currentVolume++, 2, '0') + " (pg-" + beginPage + ")";
+    return "VOLUME-" + padStart(currentVolume++, 2) + " (pg-" + beginPage + ")";
   }
 }

@@ -40,7 +40,7 @@ public class TestAll {
     Path baseInput = Paths.get("D:/temp/");
     int i = 0;
     for(IFileHandler<?> handler: handlers) {
-      IInputDescriptor desc = new InputDescriptor.Builder()
+      IInputDescriptor desc = new InputDescriptor.Builder(".pdf")
         .add(baseInput.resolve("600MB.pdf").toFile())
         .output(baseInput.resolve(outputPath[i++]))
         .build();
@@ -49,7 +49,7 @@ public class TestAll {
       });
     }
     
-    IInputDescriptor desc = new InputDescriptor.Builder()
+    IInputDescriptor desc = new InputDescriptor.Builder(".pdf")
         .add(baseInput.resolve("1.pdf").toFile())
         .add(baseInput.resolve("2.pdf").toFile())        
         .add(baseInput.resolve("3.pdf").toFile())

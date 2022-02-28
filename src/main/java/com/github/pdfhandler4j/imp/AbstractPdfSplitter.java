@@ -8,7 +8,11 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 
+import com.github.filehandler4j.IInputFile;
+import com.github.filehandler4j.IIterator;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
+import com.github.filehandler4j.imp.ArrayIterator;
+import com.github.pdfhandler4j.IPageRange;
 import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
@@ -19,7 +23,7 @@ import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent> {
+abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent, IPageRange> {
 
   protected long pageNumber = 0;
   private File currentOutput = null;
@@ -28,12 +32,16 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     this(new PageRange());
   }
   
-  public AbstractPdfSplitter(PageRange... ranges) {
-    super(ranges);
+  public AbstractPdfSplitter(IPageRange... ranges) {
+    this(new ArrayIterator<IPageRange>(ranges));
+  }
+  
+  public AbstractPdfSplitter(IIterator<IPageRange> iterator) {
+    super(iterator);
     this.reset();
   }
   
-  protected long combinedStart(PageRange range) {
+  protected long combinedStart(IPageRange range) {
     return 0;
   }
   
@@ -82,7 +90,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }  
   
   @Override
-  protected void handle(File file, Emitter<IPdfInfoEvent> emitter) throws Exception {
+  protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
       
     emitter.onNext(new PdfInfoEvent("Processando arquivo " + file.getName()));
     
@@ -96,7 +104,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
       emitter.onNext(new PdfOutputEvent("Gerado arquivo " + currentOutput.getName(), currentOutput, totalPages));
     } else {
       long max = Integer.MIN_VALUE;
-      PageRange next = nextRange();
+      IPageRange next = next();
       while(next != null) {
         long start, beginPage = pageNumber = start = next.start();
         long currentTotalPages = 0;    
@@ -136,7 +144,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
               emitter.onNext(new PdfPageEvent("Adicionada página ", pageNumber, getEndReference(totalPages)));
             }
           }while(hasNext(totalPages));
-          next = nextRange();
+          next = next();
         }catch(Exception e) {
           tryRun(document::close);
           tryRun(copy::close);
@@ -146,5 +154,5 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     };
   }  
 
-  protected abstract boolean mustSplit(long currentCombined, PageRange range, long max, long totalPages);
+  protected abstract boolean mustSplit(long currentCombined, IPageRange range, long max, long totalPages);
 }

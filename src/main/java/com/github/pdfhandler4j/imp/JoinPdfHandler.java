@@ -5,6 +5,7 @@ import static com.github.utils4j.imp.Throwables.tryRun;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileHandler;
 import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
@@ -69,12 +70,12 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
   }
 
   @Override
-  protected void handle(File file, Emitter<IPdfInfoEvent> emitter) throws Exception {
+  protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
     StopWatch handleWatch = new StopWatch();
     emitter.onNext(new PdfInfoEvent("Lendo arquivo " + file.getName()));
     
     handleWatch.start();
-    PdfReader reader = new PdfReader(file.toURI().toURL());
+    PdfReader reader = new PdfReader(file.toPath().toUri().toURL());
     long time = handleWatch.stop();
     
     emitter.onNext(new PdfInfoEvent("Lidos " + (file.length() / 1024f) + "KB em " + (time / 1000f) + " segundos"));

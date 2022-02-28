@@ -1,5 +1,7 @@
 package com.github.pdfhandler4j.imp;
 
+import com.github.pdfhandler4j.IPageRange;
+
 public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   
   protected static boolean isEven(int value) {
@@ -22,7 +24,7 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
 
   @Override
-  protected boolean mustSplit(long currentCombined, PageRange range, long max, long totalPages) {
+  protected boolean mustSplit(long currentCombined, IPageRange range, long max, long totalPages) {
     return false;
   }
 }
