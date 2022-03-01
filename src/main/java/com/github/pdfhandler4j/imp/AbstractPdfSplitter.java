@@ -1,7 +1,6 @@
 package com.github.pdfhandler4j.imp;
 
 import static com.github.utils4j.imp.Throwables.tryRun;
-import static java.lang.String.valueOf;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,7 +11,7 @@ import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.IIterator;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.filehandler4j.imp.ArrayIterator;
-import com.github.pdfhandler4j.IPageRange;
+import com.github.pdfhandler4j.IPagesSlice;
 import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
@@ -23,25 +22,25 @@ import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
-abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent, IPageRange> {
+abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent, IPagesSlice> {
 
   protected long pageNumber = 0;
   private File currentOutput = null;
 
   public AbstractPdfSplitter() {
-    this(new PageRange());
+    this(new PagesSlice());
   }
   
-  public AbstractPdfSplitter(IPageRange... ranges) {
-    this(new ArrayIterator<IPageRange>(ranges));
+  public AbstractPdfSplitter(IPagesSlice... ranges) {
+    this(new ArrayIterator<IPagesSlice>(ranges));
   }
   
-  public AbstractPdfSplitter(IIterator<IPageRange> iterator) {
+  public AbstractPdfSplitter(IIterator<IPagesSlice> iterator) {
     super(iterator);
     this.reset();
   }
   
-  protected long combinedStart(IPageRange range) {
+  protected long combinedStart(IPagesSlice range) {
     return 0;
   }
   
@@ -97,19 +96,19 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     final PdfReader inputPdf = new PdfReader(file.getAbsolutePath());
     final int totalPages = inputPdf.getNumberOfPages();
     if (totalPages <= 1) {
-      currentOutput = resolve("pg_" + valueOf(1));
+      currentOutput = resolve("pg_" + 1);
       try(OutputStream out = new FileOutputStream(currentOutput)) {
         Files.copy(file.toPath(), out);
       }
       emitter.onNext(new PdfOutputEvent("Gerado arquivo " + currentOutput.getName(), currentOutput, totalPages));
     } else {
       long max = Integer.MIN_VALUE;
-      IPageRange next = next();
+      IPagesSlice next = next();
       while(next != null) {
         long start, beginPage = pageNumber = start = next.start();
         long currentTotalPages = 0;    
         Document document = new Document();
-        currentOutput = resolve(valueOf("pg_" + beginPage));
+        currentOutput = resolve("pg_" + beginPage);
         PdfCopy copy = new PdfCopy(document , new FileOutputStream(currentOutput));
         try {
           document.open();
@@ -118,7 +117,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
             if (pageNumber > start && combinedPages == 0) {
               beginPage = pageNumber;
               document = new Document();
-              currentOutput = resolve(valueOf(pageNumber));
+              currentOutput = resolve("pg_" + pageNumber);
               copy = new PdfCopy(document , new FileOutputStream(currentOutput));
               document.open();
               currentTotalPages = 0;
@@ -154,5 +153,5 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     };
   }  
 
-  protected abstract boolean mustSplit(long currentCombined, IPageRange range, long max, long totalPages);
+  protected abstract boolean mustSplit(long currentCombined, IPagesSlice range, long max, long totalPages);
 }

@@ -6,26 +6,25 @@ import java.nio.file.Paths;
 
 import com.github.filehandler4j.IFileHandler;
 import com.github.filehandler4j.IInputDescriptor;
-import com.github.filehandler4j.imp.InputDescriptor;
 
 public class TestAll {
   
   public static void main(String[] args) throws IOException {
     IFileHandler<?>[] handlers = new IFileHandler[] {
-      new BySizePdfSplitter(50 * 1024 * 1024),
-      new ByCountPdfSplitter(300),
+      new BySizePdfSplitter(50 * 1024 * 1024), //50MB max file size
+      new ByCountPdfSplitter(300), //300 is pdf  max number of pages
       new ByPagesPdfSplitter(
-        new PageRange(1, 1),
-        new PageRange(3, 6),
-        new PageRange(10, 20),
-        new PageRange(25, 25),
-        new PageRange(100, 200),
-        new PageRange(400, 600),
-        new PageRange(3000, 4500)
+        new PagesSlice(1, 1),
+        new PagesSlice(3, 6),
+        new PagesSlice(10, 20),
+        new PagesSlice(25, 25),
+        new PagesSlice(100, 200),
+        new PagesSlice(400, 600),
+        new PagesSlice(3000, 4500)
       ),
       new ByOddPagesPdfSplitter(),
-      new ByEvenPagesPdfSplitter(),
-      new BySinglePagePdfSplitter()
+      new ByEvenPagesPdfSplitter(), 
+      new BySinglePagePdfSplitter() //single page per file
     };
     
     final String[] outputPath = new String[] {
@@ -40,7 +39,7 @@ public class TestAll {
     Path baseInput = Paths.get("D:/temp/");
     int i = 0;
     for(IFileHandler<?> handler: handlers) {
-      IInputDescriptor desc = new InputDescriptor.Builder(".pdf")
+      IInputDescriptor desc = new PdfInputDescriptor.Builder()
         .add(baseInput.resolve("600MB.pdf").toFile())
         .output(baseInput.resolve(outputPath[i++]))
         .build();
@@ -49,7 +48,7 @@ public class TestAll {
       });
     }
     
-    IInputDescriptor desc = new InputDescriptor.Builder(".pdf")
+    IInputDescriptor desc = new PdfInputDescriptor.Builder()
         .add(baseInput.resolve("1.pdf").toFile())
         .add(baseInput.resolve("2.pdf").toFile())        
         .add(baseInput.resolve("3.pdf").toFile())

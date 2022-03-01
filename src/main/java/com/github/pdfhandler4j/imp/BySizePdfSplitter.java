@@ -1,15 +1,15 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.pdfhandler4j.IPageRange;
+import com.github.pdfhandler4j.IPagesSlice;
 import com.github.utils4j.imp.Args;
 import com.itextpdf.text.pdf.PdfCopy;
 
 public class BySizePdfSplitter extends ByVolumePdfSplitter {
 
-  private final long maxSize;
+  private final long maxFileSize;
   
-  public BySizePdfSplitter(long maxSize) {
-    this.maxSize = Args.requirePositive(maxSize, "maxSize is < 1");
+  public BySizePdfSplitter(long maxFileSize) {
+    this.maxFileSize = Args.requirePositive(maxFileSize, "maxFileSize is < 1");
   }
   
   @Override
@@ -19,7 +19,7 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
   }
   
   @Override
-  protected boolean mustSplit(long currentCombinedValue, IPageRange range, long max, long totalPages) {
-    return currentCombinedValue + max + 2 * (maxSize / totalPages) > maxSize;
+  protected boolean mustSplit(long currentCombinedValue, IPagesSlice range, long max, long totalPages) {
+    return currentCombinedValue + max + 2 * (maxFileSize / totalPages) > maxFileSize;
   }
 }

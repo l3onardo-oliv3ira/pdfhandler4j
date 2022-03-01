@@ -1,20 +1,20 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.pdfhandler4j.IPageRange;
+import com.github.pdfhandler4j.IPagesSlice;
 
 public class ByPagesPdfSplitter extends ByVolumePdfSplitter{
 
-  public ByPagesPdfSplitter(PageRange... ranges) {
+  public ByPagesPdfSplitter(PagesSlice... ranges) {
     super(ranges);
   }
 
   @Override
-  public long combinedStart(IPageRange range) {
+  public long combinedStart(IPagesSlice range) {
     return range.start();
   }
   
   @Override
-  protected boolean mustSplit(long currentCombined, IPageRange range, long max, long totalPages) {
+  protected boolean mustSplit(long currentCombined, IPagesSlice range, long max, long totalPages) {
     return currentCombined >= range.end();
   };
   

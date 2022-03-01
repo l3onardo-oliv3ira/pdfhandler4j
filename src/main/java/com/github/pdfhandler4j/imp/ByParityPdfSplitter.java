@@ -1,6 +1,6 @@
 package com.github.pdfhandler4j.imp;
 
-import com.github.pdfhandler4j.IPageRange;
+import com.github.pdfhandler4j.IPagesSlice;
 
 public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   
@@ -13,7 +13,7 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
 
   protected ByParityPdfSplitter(int startPage) {
-    super(new PageRange(startPage, Integer.MAX_VALUE));
+    super(new PagesSlice(startPage, Integer.MAX_VALUE));
   }
   
   @Override
@@ -24,7 +24,7 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
 
   @Override
-  protected boolean mustSplit(long currentCombined, IPageRange range, long max, long totalPages) {
+  protected boolean mustSplit(long currentCombined, IPagesSlice range, long max, long totalPages) {
     return false;
   }
 }
