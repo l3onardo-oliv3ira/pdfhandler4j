@@ -8,14 +8,14 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 
 import com.github.filehandler4j.IInputFile;
-import com.github.filehandler4j.IIterator;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
-import com.github.filehandler4j.imp.ArrayIterator;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
 import com.github.pdfhandler4j.imp.event.PdfPageEvent;
+import com.github.utils4j.ResetableIterator;
+import com.github.utils4j.imp.ArrayIterator;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfReader;
@@ -35,7 +35,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     this(new ArrayIterator<IPagesSlice>(ranges));
   }
   
-  public AbstractPdfSplitter(IIterator<IPagesSlice> iterator) {
+  public AbstractPdfSplitter(ResetableIterator<IPagesSlice> iterator) {
     super(iterator);
     this.reset();
   }
@@ -104,15 +104,18 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     } else {
       long max = Integer.MIN_VALUE;
       IPagesSlice next = next();
+      
       while(next != null) {
         long start, beginPage = pageNumber = start = next.start();
         long currentTotalPages = 0;    
         Document document = new Document();
         currentOutput = resolve("pg_" + beginPage);
-        PdfCopy copy = new PdfCopy(document , new FileOutputStream(currentOutput));
+        PdfCopy copy = new PdfCopy(document, new FileOutputStream(currentOutput));
+      
         try {
           document.open();
           long combinedPages = combinedStart(next);
+        
           do {
             if (pageNumber > start && combinedPages == 0) {
               beginPage = pageNumber;
