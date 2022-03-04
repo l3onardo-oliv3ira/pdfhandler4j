@@ -13,7 +13,7 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
 
   protected ByParityPdfSplitter(int startPage) {
-    super(new PagesSlice(startPage, Integer.MAX_VALUE));
+    super(new DefaultPagesSlice(startPage, Integer.MAX_VALUE));
   }
   
   @Override

@@ -4,7 +4,7 @@ import com.github.pdfhandler4j.IPagesSlice;
 
 public class ByPagesPdfSplitter extends ByVolumePdfSplitter{
 
-  public ByPagesPdfSplitter(PagesSlice... ranges) {
+  public ByPagesPdfSplitter(DefaultPagesSlice... ranges) {
     super(ranges);
   }
 

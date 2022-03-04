@@ -28,7 +28,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   private File currentOutput = null;
 
   public AbstractPdfSplitter() {
-    this(new PagesSlice());
+    this(new DefaultPagesSlice());
   }
   
   public AbstractPdfSplitter(IPagesSlice... ranges) {

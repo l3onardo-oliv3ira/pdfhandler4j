@@ -8,7 +8,7 @@ public abstract class ByVolumePdfSplitter extends AbstractPdfSplitter {
   
   protected ByVolumePdfSplitter() {}
   
-  protected ByVolumePdfSplitter(PagesSlice... ranges) {
+  protected ByVolumePdfSplitter(DefaultPagesSlice... ranges) {
     super(ranges);
   }
 

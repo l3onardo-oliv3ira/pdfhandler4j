@@ -14,13 +14,13 @@ public class TestAll {
       new BySizePdfSplitter(50 * 1024 * 1024), //50MB max file size
       new ByCountPdfSplitter(300), //300 is pdf  max number of pages
       new ByPagesPdfSplitter(
-        new PagesSlice(1, 1),
-        new PagesSlice(3, 6),
-        new PagesSlice(10, 20),
-        new PagesSlice(25, 25),
-        new PagesSlice(100, 200),
-        new PagesSlice(400, 600),
-        new PagesSlice(3000, 4500)
+        new DefaultPagesSlice(1, 1),
+        new DefaultPagesSlice(3, 6),
+        new DefaultPagesSlice(10, 20),
+        new DefaultPagesSlice(25, 25),
+        new DefaultPagesSlice(100, 200),
+        new DefaultPagesSlice(400, 600),
+        new DefaultPagesSlice(3000, 4500)
       ),
       new ByOddPagesPdfSplitter(),
       new ByEvenPagesPdfSplitter(), 
