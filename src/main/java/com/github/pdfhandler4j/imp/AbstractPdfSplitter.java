@@ -14,7 +14,7 @@ import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
 import com.github.pdfhandler4j.imp.event.PdfPageEvent;
-import com.github.utils4j.ResetableIterator;
+import com.github.utils4j.IResetableIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
@@ -35,7 +35,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     this(new ArrayIterator<IPagesSlice>(ranges));
   }
   
-  public AbstractPdfSplitter(ResetableIterator<IPagesSlice> iterator) {
+  public AbstractPdfSplitter(IResetableIterator<IPagesSlice> iterator) {
     super(iterator);
     this.reset();
   }
