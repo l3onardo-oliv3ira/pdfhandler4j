@@ -19,7 +19,7 @@ public abstract class ByVolumePdfSplitter extends AbstractPdfSplitter {
   }  
   
   @Override
-  protected String computeFileName(long beginPage) {
-    return "VOLUME-" + padStart(currentVolume++, 2) + " (pg-" + beginPage + ")";
+  protected String computeFileName(String originalName, long beginPage) {
+    return originalName + "_VOLUME-" + padStart(currentVolume++, 2) + " (pg-" + beginPage + ")";
   }
 }

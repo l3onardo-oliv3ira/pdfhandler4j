@@ -11,9 +11,9 @@ import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.pdfhandler4j.IPdfInfoEvent;
-import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
 import com.github.pdfhandler4j.imp.event.PdfPageEvent;
+import com.github.pdfhandler4j.imp.event.PdfStartEvent;
 import com.github.utils4j.IResetableIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.itextpdf.text.Document;
@@ -48,8 +48,8 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     return currentCombined + 1;
   }
   
-  protected String computeFileName(long beginPage) {
-    return "pg_" + (beginPage == pageNumber ? beginPage : beginPage + "_ate_" + pageNumber);
+  protected String computeFileName(String originalName, long beginPage) {
+    return originalName + " pg_" + (beginPage == pageNumber ? beginPage : beginPage + "_ate_" + pageNumber);
   }
   
   protected int getEndReference(int totalPages) {
@@ -90,11 +90,12 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   
   @Override
   protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
-      
-    emitter.onNext(new PdfInfoEvent("Processando arquivo " + file.getName()));
     
     final PdfReader inputPdf = new PdfReader(file.getAbsolutePath());
     final int totalPages = inputPdf.getNumberOfPages();
+    final String originalName = file.getShortName();
+    
+    emitter.onNext(new PdfStartEvent("Processando arquivo " + file.getName(), totalPages));
     if (totalPages <= 1) {
       currentOutput = resolve("pg_" + 1);
       try(OutputStream out = new FileOutputStream(currentOutput)) {
@@ -136,14 +137,14 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
               document.close();
               copy.close();
               combinedPages = 0;
-              File resolve = resolve(computeFileName(beginPage));
+              File resolve = resolve(computeFileName(originalName, beginPage));
               resolve.delete();
               currentOutput.renameTo(resolve);
               emitter.onNext(new PdfOutputEvent("Gerado arquivo " + resolve.getName(), resolve, currentTotalPages));
               if (breakOnSplit())
                 break;
             } else {
-              emitter.onNext(new PdfPageEvent("Adicionada página ", pageNumber, getEndReference(totalPages)));
+              emitter.onNext(new PdfPageEvent("Adicionada página " + pageNumber, pageNumber, getEndReference(totalPages)));
             }
           }while(hasNext(totalPages));
           next = next();

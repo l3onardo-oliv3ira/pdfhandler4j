@@ -6,8 +6,8 @@ public class ByOddPagesPdfSplitter extends ByParityPdfSplitter {
   }
   
   @Override
-  protected String computeFileName(long beginPage) {
-    return "(páginas ímpares)";
+  protected String computeFileName(String originalName, long beginPage) {
+    return originalName + " - (páginas ÍMPARES)";
   }
   
   @Override

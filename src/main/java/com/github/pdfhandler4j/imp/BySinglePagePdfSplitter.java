@@ -8,7 +8,7 @@ public class BySinglePagePdfSplitter extends ByCountPdfSplitter {
   }
   
   @Override
-  protected String computeFileName(long beginPage) {
-    return "pg-" + padStart(beginPage, 5);
+  protected String computeFileName(String originalName, long beginPage) {
+    return originalName + " pg-" + padStart(beginPage, 5);
   }
 }
