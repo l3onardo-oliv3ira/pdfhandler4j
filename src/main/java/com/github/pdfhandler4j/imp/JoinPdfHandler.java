@@ -87,14 +87,11 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
       time = handleWatch.stop();
       emitter.onNext(new PdfInfoEvent("Mescladas " + totalPages + " páginas em " + (time / 1000f) + " segundos"));
     }finally {
-      handleWatch.start();
       try {
         copy.freeReader(reader);
       } finally {      
         reader.close();
-        handleWatch.stop();
       }
-      emitter.onNext(new PdfInfoEvent("handle time: " + handleWatch.getTime()));
     }
   }
   
