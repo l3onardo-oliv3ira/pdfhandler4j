@@ -97,7 +97,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     
     emitter.onNext(new PdfStartEvent("Processando arquivo " + file.getName(), totalPages));
     if (totalPages <= 1) {
-      currentOutput = resolve("pg_" + 1);
+      currentOutput =  resolve(originalName + " (PÁGINA ÚNICA)"); 
       try(OutputStream out = new FileOutputStream(currentOutput)) {
         Files.copy(file.toPath(), out);
       }
