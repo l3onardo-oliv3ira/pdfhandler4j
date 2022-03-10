@@ -14,7 +14,6 @@ import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.StopWatch;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
-import com.itextpdf.text.pdf.PdfReader;
 
 import io.reactivex.Emitter;
 
@@ -73,24 +72,18 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
   protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
     StopWatch handleWatch = new StopWatch();
     emitter.onNext(new PdfInfoEvent("Lendo arquivo " + file.getName()));
-    
     handleWatch.start();
-    PdfReader reader = new PdfReader(file.toPath().toUri().toURL());
-    long time = handleWatch.stop();
-    
-    emitter.onNext(new PdfInfoEvent("Lidos " + (file.length() / 1024f) + "KB em " + (time / 1000f) + " segundos"));
-    totalPages += reader.getNumberOfPages();
-
-    try {
-      handleWatch.start();
-      copy.addDocument(reader);
-      time = handleWatch.stop();
-      emitter.onNext(new PdfInfoEvent("Mescladas " + totalPages + " páginas em " + (time / 1000f) + " segundos"));
-    }finally {
+    try(CloseablePdfReader reader = PdfReaderProvider.SMART.getReader(file)) {
+      long time = handleWatch.stop();    
+      emitter.onNext(new PdfInfoEvent("Lidos " + (file.length() / 1024f) + "KB em " + (time / 1000f) + " segundos"));
+      totalPages += reader.getNumberOfPages();
       try {
-        copy.freeReader(reader);
-      } finally {      
-        reader.close();
+        handleWatch.start();
+        reader.addDocument(copy);        
+        time = handleWatch.stop();
+        emitter.onNext(new PdfInfoEvent("Mescladas " + totalPages + " páginas em " + (time / 1000f) + " segundos"));
+      }finally {
+        reader.freeReader(copy);          
       }
     }
   }
