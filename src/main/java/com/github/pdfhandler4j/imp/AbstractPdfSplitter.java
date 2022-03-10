@@ -12,6 +12,7 @@ import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.pdfhandler4j.IPdfInfoEvent;
+import com.github.pdfhandler4j.imp.event.PdfEndEvent;
 import com.github.pdfhandler4j.imp.event.PdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfOutputEvent;
 import com.github.pdfhandler4j.imp.event.PdfPageEvent;
@@ -167,7 +168,8 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
           }
         }
       };
-    }
+      emitter.onNext(PdfEndEvent.INSTANCE);
+    } 
   }
 
   private void safeClose(Document document, OutputStream outputStream, PdfCopy copy) {
