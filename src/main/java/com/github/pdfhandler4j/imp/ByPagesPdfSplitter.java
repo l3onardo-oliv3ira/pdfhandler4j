@@ -14,8 +14,8 @@ public class ByPagesPdfSplitter extends ByVolumePdfSplitter{
   }
   
   @Override
-  protected boolean mustSplit(long currentCombined, IPagesSlice range, long max, long totalPages) {
-    return currentCombined >= range.end();
+  protected boolean mustSplit(long currentPageNumber, IPagesSlice slice, long max, long totalPages) {
+    return currentPageNumber >= slice.end();
   };
   
   @Override

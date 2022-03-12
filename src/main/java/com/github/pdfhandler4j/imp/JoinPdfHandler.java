@@ -1,7 +1,5 @@
 package com.github.pdfhandler4j.imp;
 
-import static com.github.utils4j.imp.Throwables.tryRun;
-
 import java.io.File;
 
 import com.github.filehandler4j.IInputFile;
@@ -18,7 +16,7 @@ import io.reactivex.Emitter;
 
 public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
 
-  private final String mergeFileName;
+  private final String mergedFileName;
   private File output;
   private CloseablePdfDocument outputDocument;
   
@@ -26,12 +24,12 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
   private StopWatch stopWatch = new StopWatch();
   
   public JoinPdfHandler(String mergeFileName) {
-    this.mergeFileName = Args.requireText(mergeFileName, "mergeFileName is empty");
+    this.mergedFileName = Args.requireText(mergeFileName, "mergeFileName is empty");
   }
   
   private void close() {
     if (outputDocument != null) {
-      tryRun(outputDocument::close);
+      outputDocument.close();
       outputDocument = null;
     }
   }
@@ -47,7 +45,7 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
   
   @Override
   protected void beforeHandle(Emitter<IPdfInfoEvent> emitter) throws Exception {
-    outputDocument = new CloseablePdfDocument(output = resolveOutput(mergeFileName));
+    outputDocument = new CloseablePdfDocument(output = resolveOutput(mergedFileName));
     totalPages = 0;
     stopWatch.reset();
     stopWatch.start();

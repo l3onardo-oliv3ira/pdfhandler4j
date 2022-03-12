@@ -22,7 +22,7 @@ import io.reactivex.Emitter;
 
 abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent, IPagesSlice> {
 
-  protected long pageNumber = 0;
+  protected long currentPageNumber = 0;
   private File currentOutput = null;
 
   public AbstractPdfSplitter() {
@@ -47,7 +47,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }
   
   protected String computeFileName(String originalName, long beginPage) {
-    return originalName + " pg_" + (beginPage == pageNumber ? beginPage : beginPage + "_ate_" + pageNumber);
+    return originalName + " pg_" + (beginPage == currentPageNumber ? beginPage : beginPage + "_ate_" + currentPageNumber);
   }
   
   protected int getEndReference(int totalPages) {
@@ -55,7 +55,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }
 
   protected final boolean isEnd(final int totalPages) {
-    return pageNumber >= getEndReference(totalPages);
+    return currentPageNumber >= getEndReference(totalPages);
   }
 
   protected final boolean hasNext(final int totalPages) {
@@ -63,7 +63,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }
 
   protected long nextPage() {
-    return pageNumber++;
+    return currentPageNumber++;
   }
 
   protected boolean breakOnSplit() {
@@ -81,7 +81,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
 
   @Override
   public void reset() {
-    pageNumber = 0;
+    currentPageNumber = 0;
     currentOutput = null;
     super.reset();
   }  
@@ -109,59 +109,72 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
           }
           emitter.onNext(new PdfOutputEvent("Gerado arquivo " + currentOutput.getName(), currentOutput, totalPages));
         } else {
-          IPagesSlice next = next();
+          IPagesSlice currentSlice = nextSlice();
   
-          if (next != null) {
-            long max = Integer.MIN_VALUE;
+          if (currentSlice != null) {
+            long maxIncrement = Integer.MIN_VALUE;
+            
             do {
               
               checkInterrupted();
               
-              long start, beginPage = start = pageNumber = next.start();
+              long beginPage = currentPageNumber = currentSlice.start();
               currentOutput = resolveOutput(originalName + "-pg_" + beginPage);
               CloseablePdfDocument outputDocument = new CloseablePdfDocument(currentOutput);
               
               try {
                 long currentTotalPages = 0; 
-                long combinedPages = combinedStart(next);
+                long currentCombinedPages = combinedStart(currentSlice);
               
                 do {
-                  if (pageNumber > start && combinedPages == 0) {
-                    beginPage = pageNumber;
+                  
+                  long combinedBefore = currentCombinedPages;
+                  outputDocument.addPage(inputPdf, currentPageNumber);
+                  currentTotalPages++;
+                  currentCombinedPages = combinedIncrement(currentCombinedPages, outputDocument.getCurrentDocumentSize());
+                  
+                  maxIncrement = Math.max(currentCombinedPages - combinedBefore, maxIncrement);
+                  
+                  if (mustSplit(currentCombinedPages, currentSlice, maxIncrement, totalPages) || isEnd(totalPages)) {
+                    outputDocument.close();
+                    currentCombinedPages = 0;
+                    File resolve = resolveOutput(computeFileName(originalName, beginPage));
+                    resolve.delete();
+                    currentOutput.renameTo(resolve);
+                    emitter.onNext(new PdfOutputEvent(
+                      "Gerado arquivo " + resolve.getName(), 
+                      resolve, 
+                      currentTotalPages
+                    ));
+                    if (breakOnSplit())
+                      break;
+                  } else {
+                    emitter.onNext(new PdfPageEvent(
+                      "Adicionada página " + currentPageNumber, 
+                      currentPageNumber, 
+                      getEndReference(totalPages)
+                    ));
+                  }
+                  
+                  checkInterrupted();
+                  
+                  if (!hasNext(totalPages))
+                    break;
+                  
+                  if (currentCombinedPages == 0) {
+                    beginPage = currentPageNumber;
                     currentOutput = resolveOutput(originalName + "-pg_" + beginPage);
                     outputDocument = new CloseablePdfDocument(currentOutput);
                     currentTotalPages = 0;
                   }
                   
-                  long before = combinedPages;
-                  outputDocument.addPage(inputPdf, pageNumber);
-                  currentTotalPages++;
-                  combinedPages = combinedIncrement(combinedPages, outputDocument.getCurrentDocumentSize());
-                  
-                  max = Math.max(combinedPages - before, max);
-                  
-                  if (mustSplit(combinedPages, next, max, totalPages) || isEnd(totalPages)) {
-                    outputDocument.close();
-                    combinedPages = 0;
-                    File resolve = resolveOutput(computeFileName(originalName, beginPage));
-                    resolve.delete();
-                    currentOutput.renameTo(resolve);
-                    emitter.onNext(new PdfOutputEvent("Gerado arquivo " + resolve.getName(), resolve, currentTotalPages));
-                    if (breakOnSplit())
-                      break;
-                  } else {
-                    emitter.onNext(new PdfPageEvent("Adicionada página " + pageNumber, pageNumber, getEndReference(totalPages)));
-                  }
-                  
-                  checkInterrupted();
-                  
-                }while(hasNext(totalPages));
+                } while(true);
                 
-              }finally {
+              } finally {
                 outputDocument.close();
               }
               
-            } while((next = next()) != null);
+            } while((currentSlice = nextSlice()) != null);
           }
         };
       } finally {
@@ -174,5 +187,5 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     return false;
   }
   
-  protected abstract boolean mustSplit(long currentCombined, IPagesSlice range, long max, long totalPages);
+  protected abstract boolean mustSplit(long currentCombined, IPagesSlice slice, long maxIncrement, long totalPages);
 }
