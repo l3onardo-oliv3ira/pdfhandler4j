@@ -5,8 +5,8 @@ import com.github.pdfhandler4j.IPdfStartEvent;
 public class PdfStartEvent extends PdfInfoEvent implements IPdfStartEvent {
   private int totalPages;
   
-  public PdfStartEvent(String message, int totalPages) {
-    super(message);
+  public PdfStartEvent(int totalPages) {
+    super("start");
     this.totalPages = totalPages;
   }
   

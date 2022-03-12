@@ -4,51 +4,69 @@ import static com.github.utils4j.imp.Throwables.tryRun;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Path;
 
+import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.States;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.io.RandomAccessSource;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.BadPdfFormatException;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.ReaderProperties;
 
 public class CloseablePdfReader implements AutoCloseable {
 
-  private static final RandomAccessSourceFactory RASF = new RandomAccessSourceFactory();
+  private static long LARGE_PDF_SIZE = 50 * 1024 * 1024; 
 
-  private RandomAccessSource ras;
-  private RandomAccessFileOrArray rafa;
-  
+  private static long SMALL_PDF_SIZE = LARGE_PDF_SIZE / 8;
+
+  private RandomAccessFile raf;
   private PdfReader reader;
   
   public CloseablePdfReader(String file) throws IOException {
-    this.reader = new PdfReader(file);
+    this(new File(Args.requireText(file, "file is empty")));
   }
   
-  CloseablePdfReader(File file) throws IOException {
+  public CloseablePdfReader(Path file) throws IOException {
+    this(Args.requireNonNull(file, "file is null").toFile());
+  }
+  
+  public CloseablePdfReader(File file) throws IOException {
+    Args.requireNonNull(file, "file is null");
+    raf = new RandomAccessFile(file, "rw");
     try {
-      this.ras = RASF.createBestSource(file.getAbsolutePath());
-      this.rafa = new RandomAccessFileOrArray(ras);
-      this.reader = new PdfReader(rafa, null);
-    } catch(Throwable e){      
+      this.reader = new PdfReader(
+        new ReaderProperties()
+          .setCloseSourceOnconstructorError(true), 
+        new RandomAccessFileOrArray(
+          new RandomAccessSourceFactory()
+            .setForceRead(file.length() <= SMALL_PDF_SIZE)
+            .setUsePlainRandomAccess(file.length() > LARGE_PDF_SIZE)
+            .createBestSource(raf)
+        )
+      );
+    }catch(IOException e) {
       close();
-      throw new IOException(e);
+      throw e;
     }
   }
   
-  protected void checkAvailable() {
-    States.requireNonNull(reader, "reader already disposed");
+  protected void checkState() {
+    States.requireTrue(reader != null, "reader is closed");
   }
   
   public final int getNumberOfPages() {
-    checkAvailable();
+    checkState();
     return reader.getNumberOfPages();
   }
   
   public final void addPage(PdfCopy copy, int pageNumber) throws BadPdfFormatException, IOException {
-    checkAvailable();
+    checkState();
+    Args.requireNonNull(copy, "copy is null");
+    Args.requirePositive(pageNumber, "pageNumber <= 0");
     copy.addPage(copy.getImportedPage(reader, pageNumber));    
   }
   
@@ -58,22 +76,21 @@ public class CloseablePdfReader implements AutoCloseable {
       tryRun(reader::close);
       reader = null;
     }
-    if (ras != null) {
-      tryRun(ras::close);
-      ras = null;
+    if (raf != null) {
+      tryRun(raf::close);
+      raf = null;
     }
-    if (rafa != null) {
-      tryRun(rafa::close);
-      rafa = null;
-    }    
   }
 
-  public void addDocument(PdfCopy copy) throws DocumentException, IOException {
-    checkAvailable();
+  public final void addDocument(PdfCopy copy) throws DocumentException, IOException {
+    checkState();
+    Args.requireNonNull(copy, "copy is null");
     copy.addDocument(reader);    
   }
 
-  public void freeReader(PdfCopy copy) throws IOException {
+  public final void freeReader(PdfCopy copy) throws IOException {
+    checkState();
+    Args.requireNonNull(copy, "copy is null");
     copy.freeReader(reader);    
   }  
 }
