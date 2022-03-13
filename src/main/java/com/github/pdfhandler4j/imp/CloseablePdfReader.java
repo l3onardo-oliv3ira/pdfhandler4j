@@ -67,7 +67,7 @@ public class CloseablePdfReader implements AutoCloseable {
     checkState();
     Args.requireNonNull(copy, "copy is null");
     Args.requirePositive(pageNumber, "pageNumber <= 0");
-    copy.addPage(copy.getImportedPage(reader, pageNumber));    
+    copy.addPage(copy.getImportedPage(reader, pageNumber));
   }
   
   @Override

@@ -27,7 +27,7 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
     long pageSizeAverage = (maxFileSize / totalPages);
     long twoPagesSize = 2 * pageSizeAverage;
     //three page sizes margin of error considering one of them the currently max page size
-    long marginOfError = currentMaxPageSize + twoPagesSize; 
+    long marginOfError = (currentMaxPageSize + twoPagesSize) / 3; 
     return currentFileSize + marginOfError > maxFileSize;
   }
 }
