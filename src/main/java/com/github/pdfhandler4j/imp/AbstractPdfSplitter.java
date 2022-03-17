@@ -70,6 +70,11 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     return false;
   }
   
+  protected final IPagesSlice nextPagesSlice(long totalPages) {
+    IPagesSlice s = super.nextSlice();
+    return s == null ? null : new BoundedPagesSlice(s, totalPages);
+  }
+  
   @Override
   protected void handleError(Throwable e) {    
     if (currentOutput != null) {
@@ -109,7 +114,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
           }
           emitter.onNext(new PdfOutputEvent("Gerado arquivo " + currentOutput.getName(), currentOutput, totalPages));
         } else {
-          IPagesSlice currentSlice = nextSlice();
+          IPagesSlice currentSlice = nextPagesSlice(totalPages);
   
           if (currentSlice != null) {
             long maxIncrement = Integer.MIN_VALUE;
@@ -174,7 +179,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                 outputDocument.close();
               }
               
-            } while((currentSlice = nextSlice()) != null);
+            } while((currentSlice = nextPagesSlice(totalPages)) != null);
           }
         };
       } finally {
