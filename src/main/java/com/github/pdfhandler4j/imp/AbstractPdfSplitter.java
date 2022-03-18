@@ -22,7 +22,7 @@ import io.reactivex.Emitter;
 
 abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent, IPagesSlice> {
 
-  protected long currentPageNumber = 0;
+  private long currentPageNumber = 0;
   private File currentOutput = null;
 
   public AbstractPdfSplitter() {
@@ -59,11 +59,11 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }
 
   protected final boolean hasNext(final int totalPages) {
-    return nextPage() < getEndReference(totalPages);
+    return currentPageNumber < getEndReference(totalPages);
   }
-
-  protected long nextPage() {
-    return currentPageNumber++;
+  
+  protected long nextIncrement() {
+    return 1;
   }
 
   protected boolean breakOnSplit() {
@@ -123,9 +123,9 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
               
               checkInterrupted();
               
-              long beginPage = currentPageNumber = currentSlice.start();
-              currentOutput = resolveOutput(originalName + "-pg_" + beginPage);
-              CloseablePdfDocument outputDocument = new CloseablePdfDocument(currentOutput);
+              currentPageNumber = currentSlice.start();
+              
+              CloseablePdfDocument outputDocument = newDocument(originalName);
               
               try {
                 long currentTotalPages = 0; 
@@ -143,12 +143,9 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                   if (mustSplit(currentCombinedPages, currentSlice, maxIncrement, totalPages) || isEnd(totalPages)) {
                     outputDocument.close();
                     currentCombinedPages = 0;
-                    File resolve = resolveOutput(computeFileName(originalName, beginPage));
-                    resolve.delete();
-                    currentOutput.renameTo(resolve);
                     emitter.onNext(new PdfOutputEvent(
-                      "Gerado arquivo " + resolve.getName(), 
-                      resolve, 
+                      "Gerado arquivo " + currentOutput.getName(), 
+                      currentOutput, 
                       currentTotalPages
                     ));
                     if (breakOnSplit())
@@ -166,10 +163,10 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                   if (!hasNext(totalPages))
                     break;
                   
+                  currentPageNumber += nextIncrement();
+                  
                   if (currentCombinedPages == 0) {
-                    beginPage = currentPageNumber;
-                    currentOutput = resolveOutput(originalName + "-pg_" + beginPage);
-                    outputDocument = new CloseablePdfDocument(currentOutput);
+                    outputDocument = newDocument(originalName);
                     currentTotalPages = 0;
                   }
                   
@@ -186,6 +183,12 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
         emitter.onNext(PdfEndEvent.INSTANCE);
       }
     } 
+  }
+
+  private CloseablePdfDocument newDocument(final String originalName) throws Exception {
+    currentOutput = resolveOutput(computeFileName(originalName, currentPageNumber));
+    currentOutput.delete();              
+    return new CloseablePdfDocument(currentOutput);
   }
 
   protected boolean forceCopy(IInputFile file) {

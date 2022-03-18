@@ -6,12 +6,12 @@ public class ByEvenPagesPdfSplitter extends ByParityPdfSplitter {
   }
   
   @Override
-  protected String computeFileName(String originalName, long beginPage) {
+  protected final String computeFileName(String originalName, long beginPage) {
     return originalName + " (PÁGINAS PARES)";
   }
   
   @Override
-  protected int getEndReference(int totalPages) {
+  protected final int getEndReference(int totalPages) {
     return isOdd(totalPages) ? --totalPages : totalPages;
   }
 }

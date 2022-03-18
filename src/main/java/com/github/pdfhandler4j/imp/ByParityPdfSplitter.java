@@ -17,14 +17,12 @@ public abstract class ByParityPdfSplitter extends AbstractPdfSplitter{
   }
   
   @Override
-  protected long nextPage() {
-    long previous = currentPageNumber;
-    currentPageNumber += 2;
-    return previous;
+  protected final long nextIncrement() {
+    return 2;
   }
 
   @Override
-  protected boolean mustSplit(long currentCombined, IPagesSlice slice, long maxIncrement, long totalPages) {
+  protected final boolean mustSplit(long currentCombined, IPagesSlice slice, long maxIncrement, long totalPages) {
     return false;
   }
 }
