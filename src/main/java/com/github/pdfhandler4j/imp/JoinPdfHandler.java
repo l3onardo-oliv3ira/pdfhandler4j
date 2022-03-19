@@ -58,7 +58,7 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
     handleWatch.start();
     try(CloseablePdfReader reader = new CloseablePdfReader(file.toPath())) {
       long time = handleWatch.stop();    
-      emitter.onNext(new PdfReadingEnd("Lidos " + file.length() + " bytes em " + (time / 1000) + " segundos"));
+      emitter.onNext(new PdfReadingEnd("Lidos " + file.length() + " bytes em " + (time / 1000f) + " segundos"));
       checkInterrupted();
       totalPages += reader.getNumberOfPages();
       try {

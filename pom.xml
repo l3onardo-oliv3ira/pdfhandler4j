@@ -6,7 +6,7 @@
 
   <groupId>com.github</groupId>
   <artifactId>pdfhandler4j</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0</version>
 
   <name>pdfhandler4j</name>
   <!-- FIXME change it to the project's website -->
@@ -45,6 +45,12 @@
 	    <version>5.5.13.2</version>
 	</dependency>
 	
+	<dependency>
+		<groupId>com.github</groupId>
+  		<artifactId>filehandler4j</artifactId>
+  		<version>1.0</version>
+    </dependency>
+    
   </dependencies>
 
   <build>

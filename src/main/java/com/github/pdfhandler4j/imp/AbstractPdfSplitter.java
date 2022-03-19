@@ -99,9 +99,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     try(CloseablePdfReader inputPdf = new CloseablePdfReader(file.toPath())) {
       
       emitter.onNext(new PdfReadingEnd("Lidos " + file.length() + " bytes "));
-      
       final int totalPages = inputPdf.getNumberOfPages();
-      
       emitter.onNext(new PdfStartEvent(totalPages));
       
       try {
@@ -118,13 +116,10 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   
           if (currentSlice != null) {
             long maxIncrement = Integer.MIN_VALUE;
-            
             do {
               
               checkInterrupted();
-              
               currentPageNumber = currentSlice.start();
-              
               CloseablePdfDocument outputDocument = newDocument(originalName);
               
               try {
@@ -132,12 +127,10 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                 long currentCombinedPages = combinedStart(currentSlice);
               
                 do {
-                  
                   long combinedBefore = currentCombinedPages;
                   outputDocument.addPage(inputPdf, currentPageNumber);
                   currentTotalPages++;
                   currentCombinedPages = combinedIncrement(currentCombinedPages, outputDocument.getCurrentDocumentSize());
-                  
                   maxIncrement = Math.max(currentCombinedPages - combinedBefore, maxIncrement);
                   
                   if (mustSplit(currentCombinedPages, currentSlice, maxIncrement, totalPages) || isEnd(totalPages)) {
@@ -159,12 +152,10 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                   }
                   
                   checkInterrupted();
-                  
                   if (!hasNext(totalPages))
                     break;
                   
                   currentPageNumber += nextIncrement();
-                  
                   if (currentCombinedPages == 0) {
                     outputDocument = newDocument(originalName);
                     currentTotalPages = 0;
