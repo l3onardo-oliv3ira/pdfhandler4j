@@ -54,7 +54,7 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
   @Override
   protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
     StopWatch handleWatch = new StopWatch();
-    emitter.onNext(new PdfReadingStart("Lendo arquivo " + file.getName()));
+    emitter.onNext(new PdfReadingStart("Lendo arquivo " + file.getName() + " (seja paciente...)"));
     handleWatch.start();
     try(CloseablePdfReader reader = new CloseablePdfReader(file.toPath())) {
       long time = handleWatch.stop();    
