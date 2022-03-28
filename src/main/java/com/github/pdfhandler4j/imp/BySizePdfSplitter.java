@@ -39,6 +39,7 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
     this.maxFileSize = Args.requirePositive(maxFileSize, "maxFileSize is < 1");
   }
   
+  @Override
   protected boolean forceCopy(IInputFile file) {
     return file.length() <= maxFileSize;
   }

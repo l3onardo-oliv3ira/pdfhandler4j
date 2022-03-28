@@ -71,7 +71,6 @@ public class CloseablePdfReader implements AutoCloseable {
         new RandomAccessFileOrArray(
           new RandomAccessSourceFactory()
             .setForceRead(file.length() <= SMALL_PDF_SIZE)
-            .setUsePlainRandomAccess(file.length() > LARGE_PDF_SIZE)
             .createBestSource(raf)
         )
       );
