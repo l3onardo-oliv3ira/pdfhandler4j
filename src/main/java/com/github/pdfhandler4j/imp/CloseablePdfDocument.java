@@ -40,6 +40,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BadPdfFormatException;
 import com.itextpdf.text.pdf.PdfCopy;
+import com.itextpdf.text.pdf.PdfSmartCopy;
 
 class CloseablePdfDocument implements Closeable {
   
@@ -51,9 +52,11 @@ class CloseablePdfDocument implements Closeable {
     Args.requireNonNull(outputFile, "current output is null");
     try {
       outputStream = new FileOutputStream(outputFile);
-      document = new Document();
-      copy = new PdfCopy(document, outputStream);
-      document.open();
+      document = new Document();      
+      copy = new PdfSmartCopy(document, outputStream);
+      copy.setFullCompression();
+      copy.setCompressionLevel(9);
+      document.open();      
     }catch(Exception e) {
       close();
       throw e;

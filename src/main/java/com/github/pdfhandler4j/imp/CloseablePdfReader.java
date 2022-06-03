@@ -74,6 +74,8 @@ public class CloseablePdfReader implements AutoCloseable {
             .createBestSource(raf)
         )
       );
+      this.reader.removeUnusedObjects();
+      this.reader.consolidateNamedDestinations();      
     }catch(IOException e) {
       close();
       throw e;

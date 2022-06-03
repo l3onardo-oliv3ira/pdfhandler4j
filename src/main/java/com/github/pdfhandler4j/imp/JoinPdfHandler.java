@@ -90,6 +90,7 @@ public class JoinPdfHandler extends AbstractFileHandler<IPdfInfoEvent> {
       totalPages += reader.getNumberOfPages();
       try {
         handleWatch.start();
+        emitter.onNext(new PdfInfoEvent("Mesclando mais " + totalPages + " páginas (seja paciente...)"));
         outputDocument.addDocument(reader);
         time = handleWatch.stop();
         emitter.onNext(new PdfInfoEvent("Mescladas " + totalPages + " páginas em " + (time / 1000f) + " segundos"));

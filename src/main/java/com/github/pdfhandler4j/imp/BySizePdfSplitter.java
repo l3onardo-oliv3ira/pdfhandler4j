@@ -52,10 +52,14 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
   
   @Override
   protected boolean mustSplit(long currentFileSize, IPagesSlice slice, long currentMaxPageSize, long totalPages) {
-    long pageSizeAverage = (maxFileSize / totalPages);
-    long twoPagesSize = 2 * pageSizeAverage;
-    //three page sizes margin of error considering one of them the currently max page size
-    long marginOfError = (currentMaxPageSize + twoPagesSize) / 3; 
+    long marginOfError = computeMarginOfError(currentMaxPageSize, totalPages); 
     return currentFileSize + marginOfError > maxFileSize;
+  }
+  
+  protected long computeMarginOfError(long currentMaxPageSize, long totalPages) {
+    long pageSizeAverage = (maxFileSize / totalPages);
+    long twoPagesSize = 2 * pageSizeAverage;    
+//  return (currentMaxPageSize + twoPagesSize) / 3;    
+    return twoPagesSize;
   }
 }
