@@ -42,7 +42,7 @@ import com.itextpdf.text.pdf.BadPdfFormatException;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfSmartCopy;
 
-class CloseablePdfDocument implements Closeable {
+final class CloseablePdfDocument implements Closeable {
   
   private Document document;
   private OutputStream outputStream;
@@ -63,27 +63,27 @@ class CloseablePdfDocument implements Closeable {
     }
   }
   
-  public long getCurrentDocumentSize() {
+  public final long getCurrentDocumentSize() {
     return copy.getCurrentDocumentSize();
   }
   
-  public void addDocument(CloseablePdfReader reader) throws DocumentException, IOException {
+  public final void addDocument(CloseablePdfReader reader) throws DocumentException, IOException {
     Args.requireNonNull(reader, "reader is null");
     reader.addDocument(copy);
   }
 
-  public void addPage(CloseablePdfReader reader, long pageNumber) throws BadPdfFormatException, IOException {
+  public final void addPage(CloseablePdfReader reader, long pageNumber) throws BadPdfFormatException, IOException {
     Args.requireNonNull(reader, "reader is null");
-    reader.addPage(copy, (int)pageNumber);      
+    reader.addPage(copy, (int)pageNumber);
   }
 
-  public void freeReader(CloseablePdfReader reader) throws IOException {
+  public final void freeReader(CloseablePdfReader reader) throws IOException {
     Args.requireNonNull(reader, "reader is null");
     reader.freeReader(copy);          
   }
 
   @Override
-  public void close() {
+  public final void close() {
     if (copy != null) {
       tryRun(copy::close);
       copy = null;

@@ -44,7 +44,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 import com.itextpdf.text.pdf.ReaderProperties;
 
-public class CloseablePdfReader implements AutoCloseable {
+final class CloseablePdfReader implements AutoCloseable {
 
   private static long LARGE_PDF_SIZE = 50 * 1024 * 1024; 
 
@@ -99,7 +99,7 @@ public class CloseablePdfReader implements AutoCloseable {
   }
   
   @Override
-  public void close() {
+  public final void close() {
     if (reader != null) {
       tryRun(reader::close);
       reader = null;

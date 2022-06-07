@@ -30,7 +30,7 @@ package com.github.pdfhandler4j.imp;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.utils4j.imp.Args;
 
-public class BoundedPagesSlice implements IPagesSlice {
+final class BoundedPagesSlice implements IPagesSlice {
 
   private IPagesSlice slice;
   private long totalPages;
@@ -41,12 +41,12 @@ public class BoundedPagesSlice implements IPagesSlice {
   }
   
   @Override
-  public long start() {    
+  public final long start() {    
     return Math.min(Math.max(1, slice.start()), totalPages);
   }
 
   @Override
-  public long end() {
+  public final long end() {
     return Math.min(Math.max(1,  slice.end()), totalPages);
   }
 }
