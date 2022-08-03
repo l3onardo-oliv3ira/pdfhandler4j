@@ -30,23 +30,22 @@ package com.github.pdfhandler4j.imp;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.utils4j.imp.Args;
 
-final class BoundedPagesSlice implements IPagesSlice {
+public final class BoundedPagesSlice extends PagesSliceWrapper {
 
-  private IPagesSlice slice;
-  private long totalPages;
+  private final long totalPages;
   
   public BoundedPagesSlice(IPagesSlice slice, long totalPages) {
-    this.slice = Args.requireNonNull(slice, "slice is null");
+    super(slice);
     this.totalPages = Args.requirePositive(totalPages, "totalPags <= 0");
   }
   
   @Override
   public final long start() {    
-    return Math.min(Math.max(1, slice.start()), totalPages);
+    return Math.min(Math.max(1, super.start()), totalPages);
   }
 
   @Override
   public final long end() {
-    return Math.min(Math.max(1,  slice.end()), totalPages);
+    return Math.min(Math.max(1,  super.end()), totalPages);
   }
 }

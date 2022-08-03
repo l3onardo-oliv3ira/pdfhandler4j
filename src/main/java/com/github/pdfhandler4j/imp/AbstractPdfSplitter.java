@@ -74,7 +74,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
   }
   
   protected String computeFileName(String originalName, long beginPage) {
-    return originalName + " pg_" + (beginPage == currentPageNumber ? beginPage : beginPage + "_ate_" + currentPageNumber);
+    return originalName + " pg_" + (beginPage == currentPageNumber ? beginPage : beginPage + "_até_" + currentPageNumber);
   }
   
   protected int getEndReference(int totalPages) {
