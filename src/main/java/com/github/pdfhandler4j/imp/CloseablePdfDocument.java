@@ -27,7 +27,7 @@
 
 package com.github.pdfhandler4j.imp;
 
-import static com.github.utils4j.imp.Throwables.tryRun;
+import static com.github.utils4j.imp.Throwables.runQuietly;
 
 import java.io.Closeable;
 import java.io.File;
@@ -85,15 +85,15 @@ final class CloseablePdfDocument implements Closeable {
   @Override
   public final void close() {
     if (copy != null) {
-      tryRun(copy::close);
+      runQuietly(copy::close);
       copy = null;
     }
     if (outputStream != null) {
-      tryRun(outputStream::close);
+      runQuietly(outputStream::close);
       outputStream = null;
     }
     if (document != null) {
-      tryRun(document::close);
+      runQuietly(document::close);
       document = null;
     }
   }

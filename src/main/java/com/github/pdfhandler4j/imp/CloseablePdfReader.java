@@ -27,7 +27,7 @@
 
 package com.github.pdfhandler4j.imp;
 
-import static com.github.utils4j.imp.Throwables.tryRun;
+import static com.github.utils4j.imp.Throwables.runQuietly;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,11 +101,11 @@ final class CloseablePdfReader implements AutoCloseable {
   @Override
   public final void close() {
     if (reader != null) {
-      tryRun(reader::close);
+      runQuietly(reader::close);
       reader = null;
     }
     if (raf != null) {
-      tryRun(raf::close);
+      runQuietly(raf::close);
       raf = null;
     }
   }
