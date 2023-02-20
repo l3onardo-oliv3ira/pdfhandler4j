@@ -27,13 +27,17 @@
 
 package com.github.pdfhandler4j.imp;
 
+import static com.github.utils4j.imp.Throwables.throwIf;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
+import com.github.filehandler4j.imp.InputDescriptor;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.pdfhandler4j.IPdfInfoEvent;
 import com.github.pdfhandler4j.imp.event.PdfEndEvent;
@@ -42,7 +46,7 @@ import com.github.pdfhandler4j.imp.event.PdfPageEvent;
 import com.github.pdfhandler4j.imp.event.PdfReadingEnd;
 import com.github.pdfhandler4j.imp.event.PdfReadingStart;
 import com.github.pdfhandler4j.imp.event.PdfStartEvent;
-import com.github.utils4j.IResetableIterator;
+import com.github.utils4j.ISmartIterator;
 import com.github.utils4j.imp.ArrayIterator;
 
 import io.reactivex.Emitter;
@@ -60,7 +64,7 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     this(new ArrayIterator<IPagesSlice>(ranges));
   }
   
-  public AbstractPdfSplitter(IResetableIterator<IPagesSlice> iterator) {
+  public AbstractPdfSplitter(ISmartIterator<IPagesSlice> iterator) {
     super(iterator);
     this.reset();
   }
@@ -97,9 +101,33 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     return false;
   }
   
+  protected boolean forceCopy(IInputFile file) {
+    return false;
+  }
+  
+  protected boolean accept(long finalFileSize, long currentPageNumber, long currentTotalPages, long totalPages) {
+    return true;
+  }
+  
+  protected final File toFile() {
+    return currentOutput;
+  }
+  
+  @Override
+  public void reset() {
+    currentPageNumber = 0;
+    super.reset();
+  }  
+
   protected final IPagesSlice nextPagesSlice(long totalPages) {
     IPagesSlice s = super.nextSlice();
     return s == null ? null : new BoundedPagesSlice(s, totalPages);
+  }
+
+  private CloseablePdfDocument newDocument(final String originalName) throws Exception {
+    currentOutput = resolveOutput(computeFileName(originalName, currentPageNumber));
+    currentOutput.delete();              
+    return new CloseablePdfDocument(currentOutput);
   }
   
   @Override
@@ -110,14 +138,30 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     }
     super.handleError(e);
   }
-
-  @Override
-  public void reset() {
-    currentPageNumber = 0;
-    currentOutput = null;
-    super.reset();
-  }  
   
+  private void removeLastPage(long currentTotalPages) throws Exception {
+    InputDescriptor desc = new PdfInputDescriptor.Builder()
+        .add(currentOutput)
+        .output(currentOutput.getParentFile().toPath())
+        .build();
+    
+    AtomicReference<Throwable> failed = new AtomicReference<>();
+    ByPagesPdfSplitter s = new ByPagesPdfSplitter(new DefaultPagesSlice(1, currentTotalPages - 1));
+    s.apply(desc).subscribe(e -> {}, failed::set);
+    
+    String failMessage = "Falha na remoção de página excedente";
+    throwIf(failed.get() != null, failMessage, failed.get());
+    
+    File newOutput = s.toFile();
+    throwIf(() -> newOutput == null || !newOutput.exists(), failMessage);
+    
+    currentOutput.delete();    
+    throwIf(currentOutput::exists, failMessage);
+    throwIf(!newOutput.renameTo(currentOutput), failMessage);
+    currentOutput = newOutput;
+  } 
+  
+
   @Override
   protected void handle(IInputFile file, Emitter<IPdfInfoEvent> emitter) throws Exception {
     
@@ -156,20 +200,32 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
                 do {
                   long combinedBefore = currentCombinedPages;
                   outputDocument.addPage(inputPdf, currentPageNumber);
+                  long currentDocumentSize = outputDocument.getCurrentDocumentSize();
+                  
                   currentTotalPages++;
-                  currentCombinedPages = combinedIncrement(currentCombinedPages, outputDocument.getCurrentDocumentSize());
+                  currentCombinedPages = combinedIncrement(currentCombinedPages, currentDocumentSize);
                   maxIncrement = Math.max(currentCombinedPages - combinedBefore, maxIncrement);
                   
                   if (mustSplit(currentCombinedPages, currentSlice, maxIncrement, totalPages) || isEnd(totalPages)) {
                     outputDocument.close();
                     currentCombinedPages = 0;
+                    
+                    boolean breakLooping = breakOnSplit();
+                    
+                    if (!accept(currentDocumentSize, currentPageNumber, currentTotalPages, totalPages) ) {
+                      breakLooping = true;
+                      removeLastPage(currentTotalPages);
+                    }
+                    
                     emitter.onNext(new PdfOutputEvent(
                       "Gerado arquivo " + currentOutput.getName(), 
                       currentOutput, 
                       currentTotalPages
                     ));
-                    if (breakOnSplit())
+                    
+                    if (breakLooping)
                       break;
+                    
                   } else {
                     emitter.onNext(new PdfPageEvent(
                       "Adicionada página " + currentPageNumber, 
@@ -203,15 +259,5 @@ abstract class AbstractPdfSplitter extends AbstractFileRageHandler<IPdfInfoEvent
     } 
   }
 
-  private CloseablePdfDocument newDocument(final String originalName) throws Exception {
-    currentOutput = resolveOutput(computeFileName(originalName, currentPageNumber));
-    currentOutput.delete();              
-    return new CloseablePdfDocument(currentOutput);
-  }
-
-  protected boolean forceCopy(IInputFile file) {
-    return false;
-  }
-  
   protected abstract boolean mustSplit(long currentCombined, IPagesSlice slice, long maxIncrement, long totalPages);
 }

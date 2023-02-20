@@ -64,6 +64,7 @@ final class CloseablePdfDocument implements Closeable {
   }
   
   public final long getCurrentDocumentSize() {
+    Args.requireNonNull(copy, "copy is null");
     return copy.getCurrentDocumentSize();
   }
   

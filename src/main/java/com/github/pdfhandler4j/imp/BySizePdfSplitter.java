@@ -30,6 +30,7 @@ package com.github.pdfhandler4j.imp;
 import com.github.filehandler4j.IInputFile;
 import com.github.pdfhandler4j.IPagesSlice;
 import com.github.utils4j.imp.Args;
+import com.github.utils4j.imp.ArrayIterator;
 
 public class BySizePdfSplitter extends ByVolumePdfSplitter {
 
@@ -48,6 +49,15 @@ public class BySizePdfSplitter extends ByVolumePdfSplitter {
   public long combinedIncrement(long currentCombined, long currentDocumentSize) {
     long size = currentDocumentSize; 
     return size += 0.03 * size;
+  }
+  
+  @Override
+  protected boolean accept(long finalFileSize, long currentPageNumber, long currentTotalPages, long originalTotalPages) {
+    if (finalFileSize > maxFileSize && currentTotalPages > 1) {
+      setIterator(new ArrayIterator<>(new DefaultPagesSlice(currentPageNumber, originalTotalPages)));
+      return false;
+    }
+    return true;
   }
   
   @Override
