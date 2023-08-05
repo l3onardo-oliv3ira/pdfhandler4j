@@ -37,6 +37,7 @@ import java.nio.file.Path;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.States;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.io.RandomAccessSource;
 import com.itextpdf.text.io.RandomAccessSourceFactory;
 import com.itextpdf.text.pdf.BadPdfFormatException;
 import com.itextpdf.text.pdf.PdfCopy;
@@ -50,6 +51,9 @@ final class CloseablePdfReader implements AutoCloseable {
 
   private static long SMALL_PDF_SIZE = LARGE_PDF_SIZE / 8;
 
+  private RandomAccessSource rasf;
+  private RandomAccessFileOrArray rasfa;
+  
   private RandomAccessFile raf;
   private PdfReader reader;
   
@@ -65,14 +69,13 @@ final class CloseablePdfReader implements AutoCloseable {
     Args.requireNonNull(file, "file is null");
     raf = new RandomAccessFile(file, "rw");
     try {
+      this.rasf = new RandomAccessSourceFactory()
+          .setForceRead(file.length() <= SMALL_PDF_SIZE)
+          .createBestSource(raf);
+      this.rasfa = new RandomAccessFileOrArray(rasf);
       this.reader = new PdfReader(
-        new ReaderProperties()
-          .setCloseSourceOnconstructorError(true), 
-        new RandomAccessFileOrArray(
-          new RandomAccessSourceFactory()
-            .setForceRead(file.length() <= SMALL_PDF_SIZE)
-            .createBestSource(raf)
-        )
+        new ReaderProperties().setCloseSourceOnconstructorError(true), 
+        rasfa
       );
       this.reader.removeUnusedObjects();
       this.reader.consolidateNamedDestinations();      
@@ -104,6 +107,17 @@ final class CloseablePdfReader implements AutoCloseable {
       runQuietly(reader::close);
       reader = null;
     }
+    
+    if (rasfa != null) {
+      runQuietly(rasfa::close);
+      rasfa = null;
+    }
+    
+    if (rasf != null) {
+      runQuietly(rasf::close);
+      rasf = null;
+    }
+
     if (raf != null) {
       runQuietly(raf::close);
       raf = null;
